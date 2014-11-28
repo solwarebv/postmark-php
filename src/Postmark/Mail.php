@@ -127,16 +127,16 @@ class Mail
 		return $this;
 	}
 
-	/**
-	 * Add an attachment.
-	 *
-	 * @param string $filename What to call the file
-	 * @param string $content Raw file data
-	 * @param string $mimeType The mime type of the file
-	 * @throws OverflowException If maximum attachment size has been reached
-	 * @return Mail
-	 */
-	public function &addCustomAttachment($filename, $content, $mimeType)
+    /**
+     * Add an attachment.
+     *
+     * @param string      $filename  What to call the file
+     * @param string      $content   Raw file data
+     * @param string      $mimeType  The mime type of the file
+     * @param null|string $contentID (Optional) null by default, inline attachment identifier.
+     * @return Mail
+     */
+	public function &addCustomAttachment($filename, $content, $mimeType, $contentID = null)
 	{
 		$length = strlen($content);
 		$lengthSum = 0;
@@ -149,11 +149,12 @@ class Mail
 			throw new OverflowException("Maximum attachment size reached");
 		}
 
-		$this->_attachments[$filename] = array(
-			'content' => base64_encode($content),
-			'mimeType' => $mimeType,
-			'length' => $length
-		);
+        $this->_attachments[$filename] = array(
+            'content'   => base64_encode($content),
+            'contentID' => $contentID,
+            'mimeType'  => $mimeType,
+            'length'    => $length
+        );
 
 		return $this;
 	}
@@ -583,11 +584,20 @@ class Mail
 			$data['Attachments'] = array();
 
 			foreach ($this->_attachments as $filename => $file) {
-				$data['Attachments'][] = array(
-					'Name' => $filename,
-					'Content' => $file['content'],
-					'ContentType' => $file['mimeType']
-				);
+
+                // setup default attachment configuration
+                $attachment = array(
+                    'Name'        => $filename,
+                    'Content'     => $file['content'],
+                    'ContentType' => $file['mimeType']
+                );
+
+                // apply the ContentID parameter only if it was assigned.
+                if ($file['ContentID'] !== null) {
+                    $attachment['ContentID'] = $file['ContentID'];
+                }
+
+                $data['Attachments'][] = $attachment;
 			}
 		}
 
