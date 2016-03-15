@@ -593,8 +593,8 @@ class Mail
                 );
 
                 // apply the ContentID parameter only if it was assigned.
-                if ($file['ContentID'] !== null) {
-                    $attachment['ContentID'] = $file['ContentID'];
+                if ($file['contentID'] !== null) {
+                    $attachment['ContentID'] = $file['contentID'];
                 }
 
                 $data['Attachments'][] = $attachment;
